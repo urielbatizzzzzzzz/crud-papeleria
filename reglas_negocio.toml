@@ -1,0 +1,57 @@
+# reglas_negocio.toml — Papelería escolar
+# OJO: este archivo NO sigue el formato a propósito (repo de prueba de IA VOY).
+# Es TOML válido, pero cada bloque tiene un error de formato distinto; ver README.md.
+
+[proyecto]
+nombre  = "Papelería escolar"
+version = "1.0"
+autor   = "Equipo 11"                      # ERROR 1: campo desconocido en [proyecto]
+
+[[regla]]
+id          = "R1"                         # ERROR 2: el id debe ser RN-### (RN-001)
+titulo      = "Dinero con Decimal"
+descripcion = "Precios, totales e IVA se calculan con Decimal; nunca con float."
+severidad   = "alta"
+rutas       = ["papeleria/"]
+prohibido   = 'float\('
+
+[[regla]]
+id          = "RN-002"
+titulo      = "No se vende sin existencia"
+descripcion = "Una venta no puede sacar más piezas de las que hay en el inventario."
+severidad   = "critica"                    # ERROR 3: severidad solo alta | media | baja
+
+[[regla]]
+id          = "RN-003"
+titulo      = "Precios positivos"          # ERROR 4: falta `descripcion` (obligatoria)
+severidad   = "media"
+
+[[regla]]
+id          = "RN-004"
+titulo      = "Inventario sin print"
+descripcion = "El módulo de inventario no imprime en consola; usa logging."
+severidad   = "baja"
+rutas       = "papeleria/inventario.py"    # ERROR 5: `rutas` debe ser una lista ["..."]
+prohibido   = 'print\('
+
+[[regla]]
+id          = "RN-005"
+titulo      = "Sin eval"
+descripcion = "Nunca se usa eval() con datos del usuario."
+severidad   = "alta"
+prohibido   = 'eval\('
+prioridad   = 1                            # ERROR 6: campo desconocido en [[regla]]
+
+[[regla]]
+id          = "RN-006"
+titulo      = "Sin float en ventas"
+descripcion = "Las ventas no convierten montos a float."
+severidad   = "media"
+rutas       = ["papeleria/ventas.py"]
+prohibido   = '(float'                     # ERROR 7: regex inválida (paréntesis sin cerrar)
+
+[[regla]]
+id          = "RN-006"                     # ERROR 8: id repetido
+titulo      = "Artículos con nombre"
+descripcion = "Todo artículo tiene un nombre no vacío."
+severidad   = "baja"

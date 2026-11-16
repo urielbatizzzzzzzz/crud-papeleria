@@ -1,0 +1,9 @@
+[project]
+name = "crud-papeleria"
+version = "1.0.0"
+description = "CRUD de artículos y ventas de una papelería escolar (reglas de negocio con formato inválido, a propósito)"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+markers = ["regla(id): regla de negocio de reglas_negocio.toml que verifica esta prueba"]
