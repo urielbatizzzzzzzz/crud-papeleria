@@ -1,0 +1,69 @@
+# reglas_negocio.toml — reglas de negocio de la Papelería escolar, YA CORREGIDO (formato de IA VOY)
+#
+# Es el mismo archivo que reglas_negocio.toml de la raíz, sin sus 8 errores de formato. Sirve para probar el caso
+# "el archivo del repo tiene errores y se usan las reglas corregidas en la app": cópialo en Configuración → Reglas
+# de negocio (o en Nuevo análisis → Corregir) y analiza de nuevo. Ver README.md.
+
+[proyecto]
+nombre  = "Papelería escolar"
+version = "1.0"
+
+[[regla]]
+id          = "RN-001"
+titulo      = "El IVA se cobra exacto al centavo"
+descripcion = "El IVA de cada venta es exactamente el 16 % del total, redondeado al centavo: en una venta de $76.50 el IVA es $12.24. Así el ticket cuadra con lo que se reporta al SAT."
+severidad   = "alta"
+rutas       = ["papeleria/"]
+# PATRÓN: no debe aparecer  float(  en el código; float pierde centavos. El dinero se maneja con Decimal.
+prohibido   = 'float\('
+criterio    = "Dada una venta de $76.50, cuando se calcula el IVA, entonces es exactamente $12.24"
+
+[[regla]]
+id          = "RN-002"
+titulo      = "No se vende lo que no hay"
+descripcion = "Una venta no puede sacar más piezas de las que hay en el inventario."
+severidad   = "alta"
+criterio    = "Dado que quedan 3 lápices, cuando alguien compra 5, entonces la venta se rechaza"
+# Se verifica con la prueba test_no_se_vende_sin_existencia
+
+[[regla]]
+id          = "RN-003"
+titulo      = "Ningún artículo cuesta $0 o menos"
+descripcion = "Al dar de alta un artículo o cambiar su precio, el precio tiene que ser mayor a $0.00. Un precio en cero regalaría el artículo en caja."
+severidad   = "media"
+criterio    = "Cuando se intenta dar de alta una goma con precio $0.00, entonces el sistema lo rechaza"
+# Se verifica con la prueba test_precio_mayor_a_cero
+
+[[regla]]
+id          = "RN-004"
+titulo      = "La tasa de IVA se escribe en un solo lugar"
+descripcion = "El 16 % de IVA se toma de la constante TASA_IVA (papeleria/impuestos.py). Nadie escribe 0.16 directo en las cuentas de ventas: si la tasa cambia, se cambia en un solo lugar y no queda ningún cálculo con la tasa vieja."
+severidad   = "baja"
+rutas       = ["papeleria/ventas.py"]
+# PATRÓN: en ventas.py no debe aparecer el número  0.16  escrito a mano.
+prohibido   = '0\.16'
+
+[[regla]]
+id          = "RN-005"
+titulo      = "10 % de descuento por mayoreo desde 12 piezas"
+descripcion = "Si en una venta se llevan 12 piezas o más del mismo artículo, ese artículo lleva 10 % de descuento. Con 11 piezas o menos se cobra el precio normal."
+severidad   = "media"
+criterio    = "Dados lápices de $6.50, cuando se compran 12, entonces se cobran $70.20 (en lugar de $78.00); cuando se compran 11, se cobran $71.50"
+# Se verifica con la prueba test_descuento_por_mayoreo
+
+[[regla]]
+id          = "RN-006"
+titulo      = "El cobro no redondea a mano"
+descripcion = "El total y el IVA se redondean siempre al centavo de la misma forma (con Decimal). Nadie usa round() por su cuenta en ventas, porque redondea distinto y el ticket deja de cuadrar con la caja."
+severidad   = "baja"
+rutas       = ["papeleria/ventas.py"]
+# PATRÓN: en ventas.py no debe aparecer  round(  . El paréntesis va escapado (\() porque es una expresión regular.
+prohibido   = 'round\('
+
+[[regla]]
+id          = "RN-007"
+titulo      = "Todo artículo tiene nombre"
+descripcion = "No se puede dar de alta un artículo sin nombre (o solo con espacios): en el ticket y en el inventario aparecería una línea en blanco."
+severidad   = "baja"
+criterio    = "Cuando se intenta dar de alta un artículo con nombre «  », entonces el sistema lo rechaza"
+# Se verifica con la prueba test_articulo_con_nombre

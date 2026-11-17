@@ -4,7 +4,18 @@ from decimal import Decimal
 
 
 class SinExistencia(Exception):
-    """No hay suficientes piezas del artículo."""
+    """No hay suficientes piezas del artículo (RN-002)."""
+
+
+class ArticuloInvalido(Exception):
+    """Precio de $0 o menos (RN-003) o artículo sin nombre (RN-007)."""
+
+
+def _precio(precio: str) -> Decimal:
+    valor = Decimal(precio)
+    if valor <= 0:
+        raise ArticuloInvalido(f"El precio debe ser mayor a $0.00 (no ${valor})")
+    return valor
 
 
 @dataclass
@@ -21,7 +32,9 @@ class Inventario:
         self._siguiente = 1
 
     def crear(self, nombre: str, precio: str, piezas: int = 0) -> Articulo:
-        articulo = Articulo(self._siguiente, nombre, Decimal(precio), piezas)
+        if not nombre.strip():
+            raise ArticuloInvalido("El artículo necesita un nombre")
+        articulo = Articulo(self._siguiente, nombre.strip(), _precio(precio), piezas)
         self._articulos[articulo.id] = articulo
         self._siguiente += 1
         return articulo
@@ -30,7 +43,7 @@ class Inventario:
         return self._articulos.get(articulo_id)
 
     def actualizar_precio(self, articulo_id: int, precio: str) -> None:
-        self._articulos[articulo_id].precio = Decimal(precio)
+        self._articulos[articulo_id].precio = _precio(precio)
 
     def sacar(self, articulo_id: int, piezas: int) -> None:
         articulo = self._articulos[articulo_id]

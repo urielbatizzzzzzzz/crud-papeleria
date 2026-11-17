@@ -1,57 +1,62 @@
-# reglas_negocio.toml — Papelería escolar
+# reglas_negocio.toml — reglas de negocio de la Papelería escolar
 # OJO: este archivo NO sigue el formato a propósito (repo de prueba de IA VOY).
-# Es TOML válido, pero cada bloque tiene un error de formato distinto; ver README.md.
+# Es TOML válido, pero tiene 8 errores de formato, uno por bloque, marcados con "ERROR". Ver README.md.
+# La versión sin errores está en ejemplos/reglas_negocio_corregido.toml.
 
 [proyecto]
 nombre  = "Papelería escolar"
 version = "1.0"
-autor   = "Equipo 11"                      # ERROR 1: campo desconocido en [proyecto]
+autor   = "Equipo 11"                      # ERROR 1: [proyecto] solo admite nombre y version
 
 [[regla]]
-id          = "R1"                         # ERROR 2: el id debe ser RN-### (RN-001)
-titulo      = "Dinero con Decimal"
-descripcion = "Precios, totales e IVA se calculan con Decimal; nunca con float."
+id          = "R1"                         # ERROR 2: el id debe ser RN- y 3 dígitos (RN-001)
+titulo      = "El IVA se cobra exacto al centavo"
+descripcion = "El IVA de cada venta es exactamente el 16 % del total, redondeado al centavo: en una venta de $76.50 el IVA es $12.24. Así el ticket cuadra con lo que se reporta al SAT."
 severidad   = "alta"
 rutas       = ["papeleria/"]
 prohibido   = 'float\('
+criterio    = "Dada una venta de $76.50, cuando se calcula el IVA, entonces es exactamente $12.24"
 
 [[regla]]
 id          = "RN-002"
-titulo      = "No se vende sin existencia"
+titulo      = "No se vende lo que no hay"
 descripcion = "Una venta no puede sacar más piezas de las que hay en el inventario."
-severidad   = "critica"                    # ERROR 3: severidad solo alta | media | baja
+severidad   = "critica"                    # ERROR 3: la severidad solo puede ser alta, media o baja
+criterio    = "Dado que quedan 3 lápices, cuando alguien compra 5, entonces la venta se rechaza"
 
 [[regla]]
 id          = "RN-003"
-titulo      = "Precios positivos"          # ERROR 4: falta `descripcion` (obligatoria)
+titulo      = "Ningún artículo cuesta $0 o menos"   # ERROR 4: falta `descripcion`, que es obligatoria
 severidad   = "media"
+criterio    = "Cuando se intenta dar de alta una goma con precio $0.00, entonces el sistema lo rechaza"
 
 [[regla]]
 id          = "RN-004"
-titulo      = "Inventario sin print"
-descripcion = "El módulo de inventario no imprime en consola; usa logging."
+titulo      = "La tasa de IVA se escribe en un solo lugar"
+descripcion = "El 16 % de IVA se toma de la constante TASA_IVA (papeleria/impuestos.py). Nadie escribe 0.16 directo en las cuentas de ventas: si la tasa cambia, se cambia en un solo lugar y no queda ningún cálculo con la tasa vieja."
 severidad   = "baja"
-rutas       = "papeleria/inventario.py"    # ERROR 5: `rutas` debe ser una lista ["..."]
-prohibido   = 'print\('
+rutas       = "papeleria/ventas.py"        # ERROR 5: `rutas` es una lista: ["papeleria/ventas.py"]
+prohibido   = '0\.16'
 
 [[regla]]
 id          = "RN-005"
-titulo      = "Sin eval"
-descripcion = "Nunca se usa eval() con datos del usuario."
-severidad   = "alta"
-prohibido   = 'eval\('
-prioridad   = 1                            # ERROR 6: campo desconocido en [[regla]]
+titulo      = "10 % de descuento por mayoreo desde 12 piezas"
+descripcion = "Si en una venta se llevan 12 piezas o más del mismo artículo, ese artículo lleva 10 % de descuento. Con 11 piezas o menos se cobra el precio normal."
+severidad   = "media"
+prioridad   = 1                            # ERROR 6: `prioridad` no es un campo de las reglas
+criterio    = "Dados lápices de $6.50, cuando se compran 12, entonces se cobran $70.20 (en lugar de $78.00); cuando se compran 11, se cobran $71.50"
 
 [[regla]]
 id          = "RN-006"
-titulo      = "Sin float en ventas"
-descripcion = "Las ventas no convierten montos a float."
-severidad   = "media"
+titulo      = "El cobro no redondea a mano"
+descripcion = "El total y el IVA se redondean siempre al centavo de la misma forma (con Decimal). Nadie usa round() por su cuenta en ventas, porque redondea distinto y el ticket deja de cuadrar con la caja."
+severidad   = "baja"
 rutas       = ["papeleria/ventas.py"]
-prohibido   = '(float'                     # ERROR 7: regex inválida (paréntesis sin cerrar)
+prohibido   = 'round('                     # ERROR 7: expresión regular inválida; el paréntesis va escapado: 'round\('
 
 [[regla]]
-id          = "RN-006"                     # ERROR 8: id repetido
-titulo      = "Artículos con nombre"
-descripcion = "Todo artículo tiene un nombre no vacío."
+id          = "RN-006"                     # ERROR 8: RN-006 ya existe (debería ser RN-007)
+titulo      = "Todo artículo tiene nombre"
+descripcion = "No se puede dar de alta un artículo sin nombre (o solo con espacios): en el ticket y en el inventario aparecería una línea en blanco."
 severidad   = "baja"
+criterio    = "Cuando se intenta dar de alta un artículo con nombre «  », entonces el sistema lo rechaza"
